@@ -5,6 +5,7 @@ description = "Automated Grant System for Saint Vincent de Paul (Pasco)"
 requires-python = ">=3.12"
 dependencies = [
     "langchain",
+    "langchain-core",
     "langgraph",
     "langchain-openai",
     "langchain-community",

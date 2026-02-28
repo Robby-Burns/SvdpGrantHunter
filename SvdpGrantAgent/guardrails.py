@@ -16,8 +16,9 @@ class Guardrails:
         # Matches formats like: +1 555-555-0199, (555) 555-0199, 555-555-0199, 555-0199
         phone_pattern = r'(?:\+?1[-.\s]?)?(?:\(\d{3}\)[-.\s]?|\d{3}[-.\s]?)\d{3}[-.\s]?\d{4}|\d{3}[-.\s]?\d{4}'
         text = re.sub(phone_pattern, '[PHONE_REDACTED]', text)
-        # Scrub likely names (very basic placeholder - usually requires NER)
-        # For this MVP, we focus on obvious structured PII.
+        # Scrub likely names (basic heuristic: Title Case names preceded by titles or starting sentences)
+        text = re.sub(r'\b(Mr\.|Ms\.|Mrs\.|Dr\.)\s+[A-Z][a-z]+', '[NAME_REDACTED]', text)
+        # Note: True NER requires a library like SpaCy or an LLM.
         return text
 
     @staticmethod
