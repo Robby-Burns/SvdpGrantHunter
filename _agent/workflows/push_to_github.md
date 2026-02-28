@@ -9,13 +9,14 @@ Follow these steps to commit your changes and push them to your repository:
 ```bash
 git add .
 ```
-3. Commit with a descriptive message:
+3. Commit and Rename:
 ```bash
-git commit -m "feat: implement professional PDF export, persistent DB layer, and St. Pats branding"
+git commit -m "feat: production persistent DB, professional PDF export, and St. Pats branding"
+git branch -M main
 ```
 4. Push to your main branch:
 ```bash
-git push origin main
+git push -u origin main
 ```
 
 > [!NOTE]

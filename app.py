@@ -65,6 +65,23 @@ if "current_grant" not in st.session_state:
 if "draft_results" not in st.session_state:
     st.session_state.draft_results = {}
 
+# --- SIDEBAR STATUS (GRANDMOTHER MODE ACCESSIBILITY) ---
+with st.sidebar:
+    st.markdown("## 🛡️ System Status")
+    try:
+        from factories.db_factory import get_db_connection
+        conn = get_db_connection()
+        conn.close()
+        st.success("✅ Database: Connected")
+    except Exception:
+        st.error("❌ Database: Offline")
+    
+    st.info("Conference: St. Pats")
+    st.write("---")
+    if st.button("RESET SESSION"):
+        st.session_state.step = "scout"
+        st.rerun()
+
 # --- HELPER FUNCTIONS ---
 def start_drafting(grant):
     st.session_state.current_grant = grant
