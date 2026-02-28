@@ -1,0 +1,31 @@
+[project]
+name = "svdpgrantagent"
+version = "0.1.0"
+description = "Automated Grant System for Saint Vincent de Paul (Pasco)"
+requires-python = ">=3.12"
+dependencies = [
+    "langchain",
+    "langgraph",
+    "langchain-openai",
+    "langchain-community",
+    "pgvector",
+    "psycopg2-binary",
+    "beautifulsoup4",
+    "requests",
+    "python-dotenv",
+    "pydantic",
+    "pypdf",
+    "docx2txt",
+    "streamlit",
+    "fpdf2",
+    "pytest"
+]
+
+[tool.setuptools]
+packages = ["SvdpGrantAgent"]
+package-dir = {"SvdpGrantAgent" = "."}
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+

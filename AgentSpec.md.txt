@@ -1,0 +1,55 @@
+# AgentSpec.md: SVdP Grant Hunter & Writer
+
+**Version:** 1.0.0
+**Project:** Saint Vincent de Paul (Pasco) Automated Grant System
+**Orchestration:** LangGraph
+**Risk Score:** 8/17
+
+## 1. Executive Summary & ROI
+The **SVdP Grant Hunter & Writer** is an automated, human-in-the-loop (HITL) agentic system designed to identify local grant opportunities and draft highly accurate application packages. Built specifically for elderly volunteers, the system utilizes a "Grandmother Test UI"—featuring high-contrast, large text, and binary "Approve/Trash" decisions. 
+
+**Core Value Proposition:** By offloading the tedious discovery and initial drafting phases to AI, SVdP Pasco can exponentially increase its grant application volume without burning out its volunteer base. As this system matures, its centralized knowledge base will naturally dovetail with other multi-agent architectures operating within the organization, ensuring consistent messaging across grant writing, volunteer onboarding, and outreach.
+
+## 2. Agent Architecture 
+We are utilizing a **Cyclic/Stateful Orchestration (LangGraph)** model to seamlessly handle the required human-in-the-loop pauses.
+
+* **The Scout Agent (Discovery):** Operates on a weekly cron job. It scrapes targeted local databases (e.g., 3 Rivers Community Foundation, Catholic Foundation of Eastern Washington) and evaluates newly posted grants against SVdP's mission. Valid opportunities are pushed to a Postgres database queue.
+* **The Writer Agent (Drafting):** Triggered when a volunteer selects a grant from the queue. It extracts the required fields from the grant application, queries the SVdP Vector Database for verified facts, and maps the answers to a standardized JSON schema.
+* **The HITL Node (Review):** Execution pauses. The UI surfaces the draft to the volunteer. The volunteer can accept, reject, manually edit, or prompt the LLM to regenerate specific sections.
+* **The Form Filler (Export):** Upon volunteer approval, the final data is written to a downloadable PDF or formatted for web submission.
+
+## 3. Risk Score & Required Guardrails (Level 8/17)
+Because this agent generates external financial requests based on organizational data, it carries a moderate-to-high risk of reputational damage if hallucinations occur. 
+
+* **Strict RAG Confinement:** The Writer Agent is forbidden from utilizing its baseline training data to answer specific questions about SVdP's finances, demographics, or impact. If the answer is not in the Vector Database, the agent must leave the field blank and flag it for human input.
+* **Citation Mandate:** Every generated metric or financial figure must include a hidden citation trace back to the source document for auditing purposes.
+* **Sanitization Layer:** Web scraper inputs must be sanitized to prevent prompt injection attacks from malicious websites attempting to hijack the Scout Agent.
+* **PII Redaction:** Any uploaded SVdP documents containing client Personally Identifiable Information (PII) must be scrubbed before entering the Vector Database.
+
+## 4. Agnostic Factories Needed
+To keep the system modular and vendor-agnostic, we will implement the following factories:
+* **`KnowledgeIngestionFactory`:** Handles parsing messy Word docs, PDFs, and text into clean, chunked embeddings for the Vector Database.
+* **`ScraperFactory`:** Manages rate-limiting, proxy rotation, and DOM parsing for targeted grant websites and APIs.
+* **`DocumentExportFactory`:** Converts the approved JSON payloads into properly formatted PDFs.
+
+## 5. Data Models & Tool Definitions
+
+**Core State Schema (`GraphState`):**
+* `grant_id`: String
+* `grant_source_url`: String
+* `extracted_requirements`: List[String]
+* `draft_payload`: JSON (Mapped Q&A)
+* `human_feedback`: String (Nullable)
+* `status`: Enum (Scouted, Drafting, Pending_Review, Approved, Rejected)
+
+**Key Tools:**
+* `search_grant_database(url)`
+* `query_svdp_facts(query_string)`
+* `format_to_pdf(json_data)`
+
+## 6. Phase 1 Implementation Steps
+1.  **Phase 0: The Knowledge Base:** Interview stakeholders and ingest existing, verified SVdP data (budgets, mission statements, past successful grants) into a lightweight Vector Database (e.g., Pinecone or pgvector).
+2.  **Step 1: Build the Scout MVP:** Create the web scraper logic targeting 2-3 specific local foundations. Output findings to a simple database table.
+3.  **Step 2: Build the Writer MVP:** Connect the RAG pipeline to the Scout's output. Force the LLM to draft answers based *only* on Phase 0 data.
+4.  **Step 3: Stand up the "Grandmother UI":** Build the Next.js/Streamlit frontend connecting to the LangGraph state, focusing entirely on accessibility and the "Tinder-like" approval flow.
+5.  **Step 4: End-to-End Testing:** Run 5 historical grants through the system and evaluate the draft quality and UI friction with a real volunteer.

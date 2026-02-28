@@ -1,0 +1,15 @@
+langchain
+langgraph
+langchain-openai
+langchain-community
+pgvector
+psycopg2-binary
+beautifulsoup4
+requests
+python-dotenv
+pydantic
+pypdf
+docx2txt
+streamlit
+fpdf2
+pytest

@@ -1,0 +1,20 @@
+Metadata-Version: 2.4
+Name: svdpgrantagent
+Version: 0.1.0
+Summary: Automated Grant System for Saint Vincent de Paul (Pasco)
+Requires-Python: >=3.12
+Requires-Dist: langchain
+Requires-Dist: langgraph
+Requires-Dist: langchain-openai
+Requires-Dist: langchain-community
+Requires-Dist: pgvector
+Requires-Dist: psycopg2-binary
+Requires-Dist: beautifulsoup4
+Requires-Dist: requests
+Requires-Dist: python-dotenv
+Requires-Dist: pydantic
+Requires-Dist: pypdf
+Requires-Dist: docx2txt
+Requires-Dist: streamlit
+Requires-Dist: fpdf2
+Requires-Dist: pytest
