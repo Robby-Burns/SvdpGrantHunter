@@ -1,8 +1,8 @@
 import streamlit as st
 import uuid
-from factories.orchestrator_factory import OrchestratorFactory
-from scout import run_scout_job
-from schema import GrantRecord, GrantStatus
+from SvdpGrantAgent.factories.orchestrator_factory import OrchestratorFactory
+from SvdpGrantAgent.scout import run_scout_job
+from SvdpGrantAgent.schema import GrantRecord, GrantStatus
 
 # --- PAGE CONFIG & STYLING (GRANDMOTHER MODE) ---
 st.set_page_config(page_title="SVdP Grant Assistant", layout="wide")
@@ -69,7 +69,7 @@ if "draft_results" not in st.session_state:
 with st.sidebar:
     st.markdown("## 🛡️ System Status")
     try:
-        from factories.db_factory import get_db_connection
+        from SvdpGrantAgent.factories.db_factory import get_db_connection
         conn = get_db_connection()
         conn.close()
         st.success("✅ Database: Connected")
@@ -103,7 +103,7 @@ def handle_rewrite(feedback):
     st.rerun()
 
 def fetch_scouted_grants():
-    from factories.db_factory import get_db_connection
+    from SvdpGrantAgent.factories.db_factory import get_db_connection
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute("SELECT grant_id, grant_source_url, status FROM grants ORDER BY created_at DESC;")

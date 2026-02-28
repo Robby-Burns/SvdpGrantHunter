@@ -1,6 +1,6 @@
 from typing import Dict, Any, Optional
-from .graph import graph, run_graph, approve_grant
-from .schema import GrantRecord
+from SvdpGrantAgent.graph import graph, run_graph, approve_grant
+from SvdpGrantAgent.schema import GrantRecord
 
 class OrchestratorFactory:
     """
@@ -26,7 +26,7 @@ class OrchestratorFactory:
     @staticmethod
     def request_rewrite(thread_id: str, feedback: str) -> Dict[str, Any]:
         """Requests a rewrite based on human feedback."""
-        from .graph import request_rewrite as rr
+        from SvdpGrantAgent.graph import request_rewrite as rr
         return rr(thread_id, feedback)
 
     @staticmethod

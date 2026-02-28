@@ -1,9 +1,10 @@
 from typing import TypedDict, Annotated, Sequence, Dict, Optional
 from langgraph.graph import StateGraph, END
 from langgraph.checkpoint.memory import MemorySaver
-from .schema import GrantRecord, GrantStatus
-from .writer import WriterAgent
-from .exporter import DocumentExporter
+from SvdpGrantAgent.ingestion import KnowledgeIngestionFactory
+from SvdpGrantAgent.writer import WriterAgent
+from SvdpGrantAgent.schema import GrantRecord, GrantStatus
+from SvdpGrantAgent.exporter import DocumentExportFactory
 
 class AgentState(TypedDict):
     current_grant: GrantRecord
@@ -44,8 +45,8 @@ def human_review_node(state: AgentState):
 def export_node(state: AgentState):
     """Finalizes and exports the approved draft."""
     print("--- EXPORTING ---")
-    exporter = DocumentExporter()
-    path = exporter.export_to_pdf(state["draft_payload"], state["current_grant"].grant_id)
+    # The original `exporter = DocumentExporter()` is removed as DocumentExportFactory uses static methods.
+    path = DocumentExportFactory.export_to_pdf(state["draft_payload"], state["current_grant"].grant_id)
     return {"export_path": path}
 
 def router(state: AgentState):

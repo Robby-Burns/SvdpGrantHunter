@@ -8,6 +8,7 @@ class DocumentExporter:
     """
     Handles exporting approved grant drafts to human-readable formats.
     """
+DocumentExportFactory = DocumentExporter
     
     class PDF(FPDF):
         def header(self):

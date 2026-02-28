@@ -2,8 +2,8 @@ import requests
 from bs4 import BeautifulSoup
 from typing import List, Dict
 from abc import ABC, abstractmethod
-from .schema import GrantRecord, GrantStatus
-from .guardrails import Guardrails
+from SvdpGrantAgent.schema import GrantRecord, GrantStatus
+from SvdpGrantAgent.guardrails import Guardrails
 
 class BaseScraper(ABC):
     @abstractmethod
@@ -53,7 +53,7 @@ class ScraperFactory:
         ]
 
 def run_scout_job():
-    from .factories.db_factory import get_db_connection
+    from SvdpGrantAgent.factories.db_factory import get_db_connection
     import json
     
     scrapers = ScraperFactory.get_scrapers()

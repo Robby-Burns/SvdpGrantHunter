@@ -1,9 +1,9 @@
 import os
 from typing import List, Dict, Optional
-from .factories.llm_factory import get_llm_provider
-from .factories.db_factory import get_vector_store
+from SvdpGrantAgent.factories.llm_factory import get_llm_provider
+from SvdpGrantAgent.factories.db_factory import get_vector_store
 from langchain.prompts import ChatPromptTemplate
-from .schema import GrantRecord, GrantStatus
+from SvdpGrantAgent.schema import GrantRecord, GrantStatus
 
 class WriterAgent:
     def __init__(self):
