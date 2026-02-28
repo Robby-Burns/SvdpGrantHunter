@@ -23,7 +23,7 @@ dependencies = [
 
 [tool.setuptools]
 packages = ["SvdpGrantAgent"]
-package-dir = {"SvdpGrantAgent" = "."}
+package-dir = {"" = "."}
 
 [build-system]
 requires = ["setuptools>=61.0"]
