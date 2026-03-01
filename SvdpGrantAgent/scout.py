@@ -65,19 +65,22 @@ def run_scout_job():
     
     print(f"Found {len(all_grants)} potential grant opportunities. Saving to DB...")
     
-    conn = get_db_connection()
-    cur = conn.cursor()
-    for grant in all_grants:
-        cur.execute("""
-            INSERT INTO grants (grant_id, grant_source_url, status)
-            VALUES (%s, %s, %s)
-            ON CONFLICT (grant_id) DO NOTHING;
-        """, (grant.grant_id, grant.grant_source_url, grant.status))
-    
-    conn.commit()
-    cur.close()
-    conn.close()
-    
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        for grant in all_grants:
+            cur.execute("""
+                INSERT INTO grants (grant_id, grant_source_url, status)
+                VALUES (%s, %s, %s)
+                ON CONFLICT (grant_id) DO NOTHING;
+            """, (grant.grant_id, grant.grant_source_url, grant.status))
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+    except Exception as e:
+        print(f"Warning: Could not save scraped grants to DB: {e}")
+        
     return all_grants
 
 if __name__ == "__main__":

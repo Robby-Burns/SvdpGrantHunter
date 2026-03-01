@@ -51,7 +51,7 @@ st.markdown("""
         margin-bottom: 20px;
     }
     </style>
-    """, unsafe_allow_value=True)
+    """, unsafe_allow_html=True)
 
 # --- SESSION STATE INITIALIZATION ---
 if "thread_id" not in st.session_state:
@@ -103,14 +103,18 @@ def handle_rewrite(feedback):
     st.rerun()
 
 def fetch_scouted_grants():
-    from SvdpGrantAgent.factories.db_factory import get_db_connection
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT grant_id, grant_source_url, status FROM grants ORDER BY created_at DESC;")
-    rows = cur.fetchall()
-    cur.close()
-    conn.close()
-    return [GrantRecord(grant_id=r[0], grant_source_url=r[1], status=GrantStatus(r[2])) for r in rows]
+    try:
+        from SvdpGrantAgent.factories.db_factory import get_db_connection
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT grant_id, grant_source_url, status FROM grants ORDER BY created_at DESC;")
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+        return [GrantRecord(grant_id=r[0], grant_source_url=r[1], status=GrantStatus(r[2])) for r in rows]
+    except Exception as e:
+        print(f"Warning: Could not fetch from DB: {e}")
+        return []
 
 # --- MAIN UI ---
 st.title("👵 SVdP Grant Assistant (St. Pats)")
