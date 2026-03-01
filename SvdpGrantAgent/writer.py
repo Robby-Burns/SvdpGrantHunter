@@ -7,19 +7,32 @@ from SvdpGrantAgent.schema import GrantRecord, GrantStatus
 
 class WriterAgent:
     def __init__(self):
-        self.vectorstore = get_vector_store()
+        try:
+            self.vectorstore = get_vector_store()
+        except Exception as e:
+            print(f"⚠️ Vector store unavailable (drafting will proceed without RAG context): {e}")
+            self.vectorstore = None
         self.llm = get_llm_provider(temperature=0)
 
     def _query_knowledge_base(self, query: str) -> str:
         """
         Retrieves context from the vector database with citations.
+        Returns empty context if vector store is unavailable.
         """
-        docs = self.vectorstore.similarity_search(query, k=3)
+        if self.vectorstore is None:
+            return "[No knowledge base available. Drafting from LLM general knowledge with RAG confinement rules.]"
+        
+        try:
+            docs = self.vectorstore.similarity_search(query, k=3)
+        except Exception as e:
+            print(f"⚠️ Vector search failed: {e}")
+            return "[Vector search failed. Drafting from LLM general knowledge with RAG confinement rules.]"
+        
         context_parts = []
         for i, doc in enumerate(docs):
             source = doc.metadata.get("source", "Unknown Source")
             context_parts.append(f"[Source {i+1}: {source}]\n{doc.page_content}")
-        return "\n\n".join(context_parts)
+        return "\n\n".join(context_parts) if context_parts else "[No relevant documents found in knowledge base.]"
 
     def draft_application_section(self, section_name: str, requirements: str, feedback: Optional[str] = None) -> Dict[str, str]:
         """

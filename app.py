@@ -123,32 +123,62 @@ def fetch_scouted_grants():
         return []
 
 # --- MAIN UI ---
-st.title("👵 SVdP Grant Assistant (St. Pats)")
+st.title("🛡️ SVdP Grant Assistant (St. Pats)")
 
 if st.session_state.step == "scout":
     st.header("Step 1: Find Grant Opportunities")
     
-    if st.button("🔍 CHECK FOR NEW GRANTS"):
-        with st.spinner("Searching foundation databases..."):
-            run_scout_job()
-            st.session_state.scouted_grants = fetch_scouted_grants()
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("🔍 SCRAPE KNOWN SOURCES"):
+            with st.spinner("Searching foundation databases & RSS feeds..."):
+                run_scout_job()
+                st.session_state.scouted_grants = fetch_scouted_grants()
+    with col2:
+        if st.button("🤖 AI GRANT DISCOVERY"):
+            with st.spinner("AI is searching the web for grants matching SVdP's mission..."):
+                from SvdpGrantAgent.scout import run_discovery_job
+                run_discovery_job()
+                st.session_state.scouted_grants = fetch_scouted_grants()
     
     # Always load from DB on page load if empty
     if not st.session_state.scouted_grants:
         st.session_state.scouted_grants = fetch_scouted_grants()
 
-    if st.session_state.scouted_grants:
-        for grant in st.session_state.scouted_grants:
-            with st.container():
-                st.markdown(f"""
-                <div class="grant-card">
-                    <h3>ID: {grant.grant_id}</h3>
-                    <p>Source: <a href="{grant.grant_source_url}">{grant.grant_source_url}</a></p>
-                    <p>Status: <b>{grant.status}</b></p>
-                </div>
-                """, unsafe_allow_html=True)
-                if st.button(f"Draft Application for {grant.grant_id}", key=grant.grant_id):
-                    start_drafting(grant)
+    # Split into tabs: New Grants vs Application History
+    tab_new, tab_history = st.tabs(["📋 Available Grants", "📜 Application History"])
+    
+    with tab_new:
+        new_grants = [g for g in st.session_state.scouted_grants if g.status == GrantStatus.SCOUTED]
+        if new_grants:
+            for grant in new_grants:
+                with st.container():
+                    st.markdown(f"""
+                    <div class="grant-card">
+                        <h3>ID: {grant.grant_id}</h3>
+                        <p>Source: <a href="{grant.grant_source_url}">{grant.grant_source_url}</a></p>
+                        <p>Status: <b>{grant.status.value}</b></p>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    if st.button(f"Draft Application for {grant.grant_id}", key=grant.grant_id):
+                        start_drafting(grant)
+        else:
+            st.info("No new grants found. Click 'CHECK FOR NEW GRANTS' to scan.")
+    
+    with tab_history:
+        past_grants = [g for g in st.session_state.scouted_grants if g.status != GrantStatus.SCOUTED]
+        if past_grants:
+            for grant in past_grants:
+                with st.container():
+                    st.markdown(f"""
+                    <div class="grant-card">
+                        <h3>ID: {grant.grant_id}</h3>
+                        <p>Source: <a href="{grant.grant_source_url}">{grant.grant_source_url}</a></p>
+                        <p>Status: <b>{grant.status.value}</b></p>
+                    </div>
+                    """, unsafe_allow_html=True)
+        else:
+            st.info("No application history yet. Draft and approve a grant to see it here.")
 
 elif st.session_state.step == "drafting":
     st.header("Step 2: Review and Perfect the Draft")
