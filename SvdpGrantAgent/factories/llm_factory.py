@@ -15,9 +15,14 @@ def get_llm_provider(model_type: str = "primary", temperature: float = 0):
             temperature=temperature
         )
     elif provider == "anthropic":
-        # Lazy import if needed, but handled here for simplicity
         return ChatAnthropic(
             model=os.getenv("ANTHROPIC_MODEL", "claude-3-opus-20240229"),
+            temperature=temperature
+        )
+    elif provider == "google":
+        from langchain_google_genai import ChatGoogleGenerativeAI
+        return ChatGoogleGenerativeAI(
+            model=os.getenv("GOOGLE_MODEL", "gemini-1.5-pro"),
             temperature=temperature
         )
     

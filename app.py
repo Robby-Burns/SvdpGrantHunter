@@ -85,10 +85,13 @@ with st.sidebar:
 # --- HELPER FUNCTIONS ---
 def start_drafting(grant):
     st.session_state.current_grant = grant
-    st.session_state.step = "drafting"
-    # Initiate the LangGraph process via Factory
-    OrchestratorFactory.start_process(grant, thread_id=st.session_state.thread_id)
-    st.rerun()
+    try:
+        # Initiate the LangGraph process via Factory
+        OrchestratorFactory.start_process(grant, thread_id=st.session_state.thread_id)
+        st.session_state.step = "drafting"
+        st.rerun()
+    except Exception as e:
+        st.error(f"🛑 Error starting drafting process. Check active LLM API Key: {e}")
 
 def handle_approve():
     OrchestratorFactory.approve_step(st.session_state.thread_id)
@@ -99,8 +102,11 @@ def handle_rewrite(feedback):
     if not feedback:
         st.error("Please explain what you want changed before clicking Rewrite.")
         return
-    OrchestratorFactory.request_rewrite(st.session_state.thread_id, feedback)
-    st.rerun()
+    try:
+        OrchestratorFactory.request_rewrite(st.session_state.thread_id, feedback)
+        st.rerun()
+    except Exception as e:
+        st.error(f"🛑 Error generating rewrite. Check active LLM API Key: {e}")
 
 def fetch_scouted_grants():
     try:
@@ -181,12 +187,32 @@ elif st.session_state.step == "finished":
     st.header("🎉 Application Approved!")
     
     state = OrchestratorFactory.get_state(st.session_state.thread_id)
-    path = state.get("export_path")
+    draft_payload = state.get("draft_payload")
+    current_grant = state.get("current_grant")
     
-    st.success(f"Final document is ready for download.")
-    if path:
-        st.write(f"📁 **Location:** {path}")
+    if draft_payload and current_grant:
+        try:
+            from SvdpGrantAgent.exporter import DocumentExportFactory
+            from datetime import datetime
+            
+            pdf_bytes = DocumentExportFactory.export_to_pdf_bytes(draft_payload, current_grant.grant_id)
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f"grant_{current_grant.grant_id}_{timestamp}.pdf"
+            
+            st.success(f"Final document generated dynamically!")
+            st.download_button(
+                label="📥 DOWNLOAD PDF",
+                data=pdf_bytes,
+                file_name=filename,
+                mime="application/pdf",
+                key="download_pdf"
+            )
+        except Exception as e:
+            st.error(f"❌ Error generating PDF: {e}")
+    else:
+        st.warning("⚠️ Draft payload or grant data missing. Cannot generate PDF.")
     
+    st.divider()
     if st.button("GO BACK TO START"):
         st.session_state.step = "scout"
         st.session_state.thread_id = str(uuid.uuid4())

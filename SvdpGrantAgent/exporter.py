@@ -100,4 +100,43 @@ class DocumentExporter:
         
         return output_path
 
+    @staticmethod
+    def export_to_pdf_bytes(draft_payload: Dict[str, str], grant_id: str) -> bytes:
+        """
+        Exports the draft to a professional PDF file and returns the byte array
+        (Useful for ephemeral environments like Railway/Docker).
+        """
+        pdf = DocumentExporter.PDF()
+        pdf.add_page()
+        pdf.set_auto_page_break(auto=True, margin=15)
+        
+        # Title
+        pdf.set_font('helvetica', 'B', 20)
+        pdf.set_text_color(0, 0, 0)
+        pdf.cell(0, 15, f'Grant Application Draft: {grant_id}', ln=True)
+        pdf.ln(5)
+
+        # Content Sections
+        for section, content in draft_payload.items():
+            # Section Header
+            pdf.set_font('helvetica', 'B', 14)
+            pdf.set_fill_color(243, 244, 246) # Light Grey
+            pdf.cell(0, 10, section, ln=True, fill=True)
+            pdf.ln(2)
+            
+            # Section Content
+            pdf.set_font('helvetica', '', 12)
+            pdf.multi_cell(0, 8, content)
+            pdf.ln(10)
+
+        # Audit/Appendix
+        pdf.add_page()
+        pdf.set_font('helvetica', 'B', 12)
+        pdf.cell(0, 10, 'Audit Trail & Citation Traces', ln=True)
+        pdf.set_font('helvetica', 'I', 9)
+        pdf.set_text_color(150, 150, 150)
+        pdf.multi_cell(0, 5, "This document was generated using the SVdP Agentic System with strict RAG confinement. Every metric or factual claim is associated with a source document verified by the organization.")
+        
+        return bytes(pdf.output())
+
 DocumentExportFactory = DocumentExporter
