@@ -21,9 +21,18 @@ def get_db_connection():
     Returns a raw psycopg2 connection for standard SQL operations.
     """
     import psycopg2
-    connection_string = os.getenv("DATABASE_URL", "postgresql+psycopg2://localhost/svdp_grants")
-    # psycopg2 expects 'postgresql://' not 'postgresql+psycopg2://'
+    import re
+    
+    connection_string = os.getenv("DATABASE_URL")
+    if not connection_string:
+        print("DEBUG: DATABASE_URL is missing from environment. Falling back to localhost.")
+        connection_string = "postgresql+psycopg2://localhost/svdp_grants"
+        
     if "+psycopg2" in connection_string:
         connection_string = connection_string.replace("+psycopg2", "")
+    
+    # Safely log the connection string without the password
+    safe_string = re.sub(r":[^/@]+@", ":***@", connection_string)
+    print(f"DEBUG: Connecting to DB -> {safe_string}")
     
     return psycopg2.connect(connection_string)

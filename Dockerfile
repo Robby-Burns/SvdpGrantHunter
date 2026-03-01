@@ -21,9 +21,8 @@ RUN pip install --no-cache-dir .
 EXPOSE 8080
 
 # Environment variables for Streamlit
-ENV STREAMLIT_SERVER_PORT=8080
 ENV STREAMLIT_SERVER_ADDRESS=0.0.0.0
 ENV STREAMLIT_SERVER_HEADLESS=true
 
-# Run the application
-CMD ["streamlit", "run", "app.py"]
+# Run the application on the dynamic port provided by Railway (or fallback to 8080 locally)
+CMD ["sh", "-c", "streamlit run app.py --server.port=${PORT:-8080}"]
