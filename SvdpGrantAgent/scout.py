@@ -56,6 +56,37 @@ class ScraperFactory:
             GenericScraper("https://www.catholicfoundation.org/grants", "CatholicFoundation")
         ]
 
+def _seed_demo_grants():
+    """
+    Seeds the database with sample grants so the UI is never empty.
+    Only inserts if the grants table has zero rows.
+    """
+    from SvdpGrantAgent.factories.db_factory import get_db_connection
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT COUNT(*) FROM grants;")
+        count = cur.fetchone()[0]
+        if count == 0:
+            print("Seeding database with demo grant opportunities...")
+            demo_grants = [
+                ("DEMO_community_food_bank_2026", "https://example.com/grants/food-bank", "Scouted"),
+                ("DEMO_elderly_outreach_initiative", "https://example.com/grants/elderly-outreach", "Scouted"),
+                ("DEMO_housing_assistance_fund", "https://example.com/grants/housing-assistance", "Scouted"),
+            ]
+            for grant_id, url, status in demo_grants:
+                cur.execute("""
+                    INSERT INTO grants (grant_id, grant_source_url, status)
+                    VALUES (%s, %s, %s)
+                    ON CONFLICT (grant_id) DO NOTHING;
+                """, (grant_id, url, status))
+            conn.commit()
+            print(f"✅ Seeded {len(demo_grants)} demo grants.")
+        cur.close()
+        conn.close()
+    except Exception as e:
+        print(f"Warning: Could not seed demo grants: {e}")
+
 def run_scout_job():
     from SvdpGrantAgent.factories.db_factory import get_db_connection
     import json
@@ -84,6 +115,10 @@ def run_scout_job():
         conn.close()
     except Exception as e:
         print(f"Warning: Could not save scraped grants to DB: {e}")
+    
+    # If no live grants were found, seed the DB with demo grants so the UI isn't empty
+    if len(all_grants) == 0:
+        _seed_demo_grants()
         
     return all_grants
 
