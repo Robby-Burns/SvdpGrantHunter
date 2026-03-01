@@ -20,9 +20,13 @@ class GenericScraper(BaseScraper):
         Simple generic scraper. In production, this would be highly customized 
         or use an LLM for DOM parsing.
         """
-        response = requests.get(self.url)
-        if response.status_code != 200:
-            print(f"Failed to fetch {self.url}")
+        try:
+            response = requests.get(self.url, timeout=15)
+            if response.status_code != 200:
+                print(f"Failed to fetch {self.url} (Status: {response.status_code})")
+                return []
+        except requests.exceptions.RequestException as e:
+            print(f"Network error fetching {self.url}: {e}")
             return []
         
         # Guardrail: Sanitize HTML content before parsing
