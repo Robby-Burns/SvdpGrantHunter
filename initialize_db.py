@@ -15,12 +15,21 @@ def initialize_database():
 
     try:
         # Connect to the database
+        if "+psycopg2" in connection_string:
+            connection_string = connection_string.replace("+psycopg2", "")
         conn = psycopg2.connect(connection_string)
         conn.autocommit = True
         cur = conn.cursor()
 
-        print("Enabling vector extension...")
-        cur.execute("CREATE EXTENSION IF NOT EXISTS vector;")
+        # Vector extension is optional - Railway may not have it
+        try:
+            print("Enabling vector extension...")
+            cur.execute("CREATE EXTENSION IF NOT EXISTS vector;")
+            print("✅ Vector extension enabled.")
+        except Exception as ve:
+            print(f"⚠️ Vector extension not available (non-fatal): {ve}")
+            # Re-establish connection since the failed transaction may have aborted
+            conn.rollback()
 
         print("Creating 'grants' table...")
         cur.execute("""
@@ -39,13 +48,13 @@ def initialize_database():
         print("Creating 'organization_facts' table...")
         # Note: langchain's PGVector usually handles its own 'langchain_pg_collection' and 'langchain_pg_embedding' tables,
         # but we ensure our custom schema co-exists.
-        print("Database initialized successfully.")
+        print("✅ Database initialized successfully.")
         
         cur.close()
         conn.close()
 
     except Exception as e:
-        print(f"Error during database initialization: {e}")
+        print(f"❌ Error during database initialization: {e}")
 
 if __name__ == "__main__":
     initialize_database()
