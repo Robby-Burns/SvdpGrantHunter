@@ -37,11 +37,14 @@ You must strictly follow this "Read -> Act -> Update" loop for every task:
 
 1. **PHASE 1: READ (MANDATORY)** Before writing any code, you MUST silently read `.claude-context.md` and `.bugs_tracker.md`. Use this to understand where we left off, what the current architecture is, and what bugs to avoid. Do not ask for setup information that is already in these files.
 
-2. **PHASE 2: ACT (THE RISK SCORE LOCK)**
+2. **PHASE 2: ACT (THE RISK SCORE LOCK & FAULT TOLERANCE)**
    You are FORBIDDEN from generating agent code or architecture until you know the 0-17 Risk Score (defined in `docs/01_QUICK_REFERENCE.md`). 
    - Use the Agnostic Factory pattern (`docs/08_AGNOSTIC_FACTORIES.md`) for all external dependencies (DBs, LLMs, Orchestrators).
    - System behavior must be driven by `config/scale.yaml`, not hardcoded.
    - Always implement security guardrails appropriate to the Risk Score before writing core business logic.
+   - **ASSUME NOTHING. GUARD EVERYTHING.** Wrap all external network and database I/O in `try/except` blocks with graceful degradation.
+   - **WRITE DEFENSIVELY FOR CONTAINERS.** Do not rely on local ephemeral filesystems (e.g., `/tmp/`). Use BytesIO buffers or save directly to a persistent database.
+   - **ENFORCE STRICT TIMEOUTS.** Do not block the main UI thread with synchronous background tasks (like scraping). Use timeouts and background workers.
 
 3. **PHASE 3: UPDATE (MANDATORY BOOKKEEPING)**
    Immediately after making a change, fixing a bug, or making an architectural decision, YOU must update the memory files:

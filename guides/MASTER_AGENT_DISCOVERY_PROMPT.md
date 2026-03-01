@@ -74,6 +74,7 @@ Once we agree, you will generate a comprehensive Markdown document named `AgentS
 - Risk Score & Required Guardrails
 - Agnostic Factories needed
 - Data Models & Tool Definitions
+- **Non-Functional Requirements:** Must explicitly dictate Fault Tolerance (try/except standard), Container Defensiveness (no ephemeral disk I/O), and Strict UI Timeouts.
 - Phase 1 Implementation Steps
 
 ## 🚀 Let's Begin
