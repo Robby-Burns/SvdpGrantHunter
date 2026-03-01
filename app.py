@@ -73,8 +73,8 @@ with st.sidebar:
         conn = get_db_connection()
         conn.close()
         st.success("✅ Database: Connected")
-    except Exception:
-        st.error("❌ Database: Offline")
+    except Exception as e:
+        st.error(f"❌ Database: Offline ({str(e)})")
     
     st.info("Conference: St. Pats")
     st.write("---")

@@ -23,6 +23,7 @@ EXPOSE 8080
 # Environment variables for Streamlit
 ENV STREAMLIT_SERVER_ADDRESS=0.0.0.0
 ENV STREAMLIT_SERVER_HEADLESS=true
+ENV PYTHONUNBUFFERED=1
 
-# Run the application on the dynamic port provided by Railway (or fallback to 8080 locally)
-CMD ["sh", "-c", "streamlit run app.py --server.port=${PORT:-8080}"]
+# Initialize DB schema then run the application on the dynamic port (fallback to 8080 locally)
+CMD ["sh", "-c", "python initialize_db.py && streamlit run app.py --server.port=${PORT:-8080}"]
